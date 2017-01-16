@@ -1226,33 +1226,33 @@ def real_main():
 	setup_cluster(conn, master_nodes, slave_nodes, opts, True)
 
     elif action == "start":
-        (master_nodes, slave_nodes) = get_existing_cluster(conn, opts, cluster_name)
-        print("Starting slaves...")
-        for inst in slave_nodes:
-            if inst.state not in ["shutting-down", "terminated"]:
-                inst.start()
-        print("Starting master...")
-        for inst in master_nodes:
-            if inst.state not in ["shutting-down", "terminated"]:
-                inst.start()
-        wait_for_cluster_state(
-            conn=conn,
-            opts=opts,
-            cluster_instances=(master_nodes + slave_nodes),
-            cluster_state='ssh-ready'
-        )
+	(master_nodes, slave_nodes) = get_existing_cluster(conn, opts, cluster_name)
+	print("Starting slaves...")
+	for inst in slave_nodes:
+	    if inst.state not in ["shutting-down", "terminated"]:
+		inst.start()
+	print("Starting master...")
+	for inst in master_nodes:
+	    if inst.state not in ["shutting-down", "terminated"]:
+		inst.start()
+	wait_for_cluster_state(
+	    conn=conn,
+	    opts=opts,
+	    cluster_instances=(master_nodes + slave_nodes),
+	    cluster_state='ssh-ready'
+	)
 
-        # Determine types of running instances
-        existing_master_type = master_nodes[0].instance_type
-        existing_slave_type = slave_nodes[0].instance_type
-        # Setting opts.master_instance_type to the empty string indicates we
-        # have the same instance type for the master and the slaves
-        if existing_master_type == existing_slave_type:
-            existing_master_type = ""
-        opts.master_instance_type = existing_master_type
-        opts.instance_type = existing_slave_type
+	# Determine types of running instances
+	existing_master_type = master_nodes[0].instance_type
+	existing_slave_type = slave_nodes[0].instance_type
+	# Setting opts.master_instance_type to the empty string indicates we
+	# have the same instance type for the master and the slaves
+	if existing_master_type == existing_slave_type:
+	    existing_master_type = ""
+	opts.master_instance_type = existing_master_type
+	opts.instance_type = existing_slave_type
 
-        setup_cluster(conn, master_nodes, slave_nodes, opts, False
+	setup_cluster(conn, master_nodes, slave_nodes, opts, False)
 
     elif action == "destroy":
 	(master_nodes, slave_nodes) = get_existing_cluster(
