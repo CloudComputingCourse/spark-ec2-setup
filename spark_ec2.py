@@ -135,7 +135,7 @@ def parse_args():
 	prog="spark-ec2",
 	version="%prog {v}".format(v=SPARK_EC2_VERSION),
 	usage="%prog [options] <action> <cluster_name>\n\n"
-	+ "<action> can be: launch, destroy, login, stop, start, get-master, reboot-slaves")
+	+ "<action> can be: launch, destroy, stop")
 
     parser.add_option(
 	"-s", "--slaves", type="int", default=1,
@@ -688,11 +688,34 @@ def get_existing_cluster(conn, opts, cluster_name, die_on_error=True):
 
     return (master_instances, slave_instances)
 
+def permit_root_ssh_login(host, opts):
+    tries = 0
+    cmd = "sudo cp ~/.ssh/authorized_keys /root/.ssh/authorized_keys"
+    while True:
+	try:
+	    return subprocess.check_call(
+		ssh_command(opts) + ['-t', '-t', '%s@%s' % ("ubuntu", host),
+				     stringify_command(cmd)])
+	except subprocess.CalledProcessError as e:
+	    if tries > 5:
+		# If this was an ssh failure, provide the user with hints.
+		if e.returncode == 255:
+		    raise UsageError(
+			"Failed to SSH to remote host {0}.\n"
+			"Please check that you have provided the correct --identity-file and "
+			"--key-pair parameters and try again.".format(host))
+		else:
+		    raise e
+	    print("Error executing remote command, retrying after 30 seconds: {0}".format(e),
+		  file=stderr)
+	    time.sleep(30)
+	    tries = tries + 1
 
 # Deploy configuration files and run setup scripts on a newly launched
 # or started EC2 cluster.
 def setup_cluster(conn, master_nodes, slave_nodes, opts, deploy_ssh_key):
     master = get_dns_name(master_nodes[0], opts.private_ips)
+    permit_root_ssh_login(master, opts)
     if deploy_ssh_key:
 	print("Generating cluster's SSH key on master...")
 	key_setup = """
@@ -706,6 +729,7 @@ def setup_cluster(conn, master_nodes, slave_nodes, opts, deploy_ssh_key):
 	for slave in slave_nodes:
 	    slave_address = get_dns_name(slave, opts.private_ips)
 	    print(slave_address)
+	    permit_root_ssh_login(slave_address, opts)
 	    ssh_write(slave_address, opts, ['tar', 'x'], dot_ssh_tar)
 
     modules = ['hadoop', 'spark']
@@ -1126,16 +1150,6 @@ def real_main():
     # Input parameter validation
     validate_spark_version(opts.spark_version, opts.spark_git_repo)
 
-    if opts.wait is not None:
-	# NOTE: DeprecationWarnings are silent in 2.7+ by default.
-	#       To show them, run Python with the -Wdefault switch.
-	# See: https://docs.python.org/3.5/whatsnew/2.7.html
-	warnings.warn(
-	    "This option is deprecated and has no effect. "
-	    "spark-ec2 automatically waits as long as necessary for clusters to start up.",
-	    DeprecationWarning
-	)
-
     if opts.identity_file is not None:
 	if not os.path.exists(opts.identity_file):
 	    print("ERROR: The identity file '{f}' doesn't exist.".format(f=opts.identity_file),
@@ -1200,7 +1214,7 @@ def real_main():
 	if opts.slaves <= 0:
 	    print("ERROR: You have to start at least 1 slave", file=sys.stderr)
 	    sys.exit(1)
-        (master_nodes, slave_nodes) = launch_cluster(conn, opts, cluster_name)
+	(master_nodes, slave_nodes) = launch_cluster(conn, opts, cluster_name)
 	wait_for_cluster_state(
 	    conn=conn,
 	    opts=opts,
