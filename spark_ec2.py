@@ -135,7 +135,7 @@ def parse_args():
 	prog="spark-ec2",
 	version="%prog {v}".format(v=SPARK_EC2_VERSION),
 	usage="%prog [options] <action> <cluster_name>\n\n"
-	+ "<action> can be: launch, destroy, stop")
+	+ "<action> can be: launch, start, destroy, stop")
 
     parser.add_option(
 	"-s", "--slaves", type="int", default=1,
@@ -743,7 +743,7 @@ def setup_cluster(conn, master_nodes, slave_nodes, opts, deploy_ssh_key):
 	opts=opts,
 	command="rm -rf spark-ec2"
 	+ " && "
-	+ "git clone {r} -b {b} spark-ec2".format(r=opts.spark_ec2_git_repo,
+	+ "git clone {r} -b {b} spark-ec2-setup".format(r=opts.spark_ec2_git_repo,
 						  b=opts.spark_ec2_git_branch)
     )
 
@@ -955,7 +955,9 @@ def deploy_files(conn, root_dir, opts, master_nodes, slave_nodes, modules):
     spark_v = validate_spark_version(opts.spark_version, opts.spark_git_repo)
 
     master_addresses = [get_dns_name(i, opts.private_ips) for i in master_nodes]
+    print(master_addresses)
     slave_addresses = [get_dns_name(i, opts.private_ips) for i in slave_nodes]
+    print(slave_addresses)
     worker_instances_str = "%d" % opts.worker_instances if opts.worker_instances else ""
     template_vars = {
 	"master_list": '\n'.join(master_addresses),
@@ -1222,6 +1224,35 @@ def real_main():
 	    cluster_state='ssh-ready'
 	)
 	setup_cluster(conn, master_nodes, slave_nodes, opts, True)
+
+    elif action == "start":
+        (master_nodes, slave_nodes) = get_existing_cluster(conn, opts, cluster_name)
+        print("Starting slaves...")
+        for inst in slave_nodes:
+            if inst.state not in ["shutting-down", "terminated"]:
+                inst.start()
+        print("Starting master...")
+        for inst in master_nodes:
+            if inst.state not in ["shutting-down", "terminated"]:
+                inst.start()
+        wait_for_cluster_state(
+            conn=conn,
+            opts=opts,
+            cluster_instances=(master_nodes + slave_nodes),
+            cluster_state='ssh-ready'
+        )
+
+        # Determine types of running instances
+        existing_master_type = master_nodes[0].instance_type
+        existing_slave_type = slave_nodes[0].instance_type
+        # Setting opts.master_instance_type to the empty string indicates we
+        # have the same instance type for the master and the slaves
+        if existing_master_type == existing_slave_type:
+            existing_master_type = ""
+        opts.master_instance_type = existing_master_type
+        opts.instance_type = existing_slave_type
+
+        setup_cluster(conn, master_nodes, slave_nodes, opts, False
 
     elif action == "destroy":
 	(master_nodes, slave_nodes) = get_existing_cluster(

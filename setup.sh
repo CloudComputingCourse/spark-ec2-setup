@@ -78,12 +78,12 @@ echo_time_diff "setup-slave" "$setup_slave_start_time" "$setup_slave_end_time"
 # Deploy templates
 # TODO: Move configuring templates to a per-module ?
 echo "Creating local config files..."
-./deploy_templates.py
+/root/spark-ec2-setup/deploy_templates.py
 
 # Copy spark conf by default
 echo "Deploying Spark config files..."
 chmod u+x /root/spark/conf/spark-env.sh
-/root/spark-ec2/copy-dir /root/spark/conf
+/root/spark-ec2-setup/copy-dir /root/spark/conf
 
 # Setup each module
 for module in $MODULES; do
