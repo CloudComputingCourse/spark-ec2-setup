@@ -9,7 +9,7 @@ mkdir -p /vol1/hadoop.tmp
 NAMENODE_DIR="/vol1/hadoop.tmp/dfs/name"
 PERSISTENT_HDFS=/root/hadoop
 
-if [ -f "$NAMENODE_DIR/current/VERSION" ] then
+if [ -f "$NAMENODE_DIR/current/VERSION" ]; then
   echo "Hadoop namenode appears to be formatted: skipping"
 else
   echo "Formatting ephemeral HDFS namenode..."
