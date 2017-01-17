@@ -37,5 +37,5 @@ created based on it). This tool is baased on `spark-ec2` (https://github.com/amp
 ## Other Actions
 
  - You may also `stop` a running cluster and `start` the stopped cluster. When a stopped cluster is restarted, it preserves
-   the data stored in HDFS.
+   the data stored in HDFS. Spot instances do not support start and stop.
  - You can also `destroy` a cluster, which terminates the instances and delete the EBS volume.
