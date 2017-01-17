@@ -14,3 +14,4 @@ sleep 20
 
 # Start Workers
 $BIN_FOLDER/start-slaves.sh
+$BIN_FOLDER/start-history-server.sh
