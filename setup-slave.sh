@@ -38,7 +38,7 @@ chmod -R a+w /vol1
 
 # Remove ~/.ssh/known_hosts because it gets polluted as you start/stop many
 # clusters (new machines tend to come up under old hostnames)
-rm -f /root/.ssh/known_hosts
+# rm -f /root/.ssh/known_hosts
 
 # Create swap space on /mnt
 /root/spark-ec2-setup/create-swap.sh $SWAP_MB
