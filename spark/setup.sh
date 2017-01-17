@@ -6,6 +6,8 @@ BIN_FOLDER="/root/spark/sbin"
 cp /root/spark-ec2-setup/slaves /root/spark/conf/
 /root/spark-ec2-setup/copy-dir /root/spark/conf
 
+/root/hadoop/bin/hdfs dfs -mkdir /spark_eventlog
+
 # Start Master
 $BIN_FOLDER/start-master.sh
 
