@@ -10,6 +10,8 @@ fi
 # Make sure we are in the spark-ec2 directory
 pushd /root/spark-ec2-setup > /dev/null
 
+source ec2-variables.sh
+
 # Set hostname based on EC2 private DNS name, so that it is set correctly
 # even if the instance is restarted with a different private DNS name
 PRIVATE_DNS=`wget -q -O - http://169.254.169.254/latest/meta-data/local-hostname`
