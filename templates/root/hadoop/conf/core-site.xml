@@ -17,10 +17,10 @@
 <!-- Put site-specific property overrides in this file. -->
 
 <configuration>
-  <property>
+<!--  <property>
     <name>fs.default.name</name>
     <value>hdfs://{{active_master}}:9010</value>
-  </property>
+  </property>-->
 
   <property>
     <name>fs.defaultFS</name>

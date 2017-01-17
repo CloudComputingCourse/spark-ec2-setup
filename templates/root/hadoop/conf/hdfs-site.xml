@@ -24,7 +24,7 @@
 
   <property>
     <name>dfs.datanode.data.dir</name>
-    <value>/vol0</value>
+    <value>/vol1</value>
   </property>
 
   <property>
