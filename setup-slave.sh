@@ -30,7 +30,9 @@ rm -rf /vol1
 mkdir /vol1
 # To turn TRIM support on, uncomment the following line.
 #echo '/dev/xvdb /mnt  ext4  defaults,noatime,nodiratime,discard 0 0' >> /etc/fstab
-mkfs.ext4 -E lazy_itable_init=0,lazy_journal_init=0 /dev/xvds
+if [ "$1" == "true" ]; then
+    mkfs.ext4 -E lazy_itable_init=0,lazy_journal_init=0 /dev/xvds
+fi
 mount -o $EXT4_MOUNT_OPTS /dev/xvds /vol1
 
 # Make data dirs writable by non-root users, such as CDH's hadoop user

@@ -713,7 +713,7 @@ def permit_root_ssh_login(host, opts):
 
 # Deploy configuration files and run setup scripts on a newly launched
 # or started EC2 cluster.
-def setup_cluster(conn, master_nodes, slave_nodes, opts, deploy_ssh_key):
+def setup_cluster(conn, master_nodes, slave_nodes, opts, deploy_ssh_key, format_ebs):
     master = get_dns_name(master_nodes[0], opts.private_ips)
     if deploy_ssh_key:
         permit_root_ssh_login(master, opts)
@@ -766,13 +766,13 @@ def setup_cluster(conn, master_nodes, slave_nodes, opts, deploy_ssh_key):
 	)
 
     print("Running setup on master...")
-    setup_spark_cluster(master, opts)
+    setup_spark_cluster(master, opts, format_ebs)
     print("Done!")
 
 
-def setup_spark_cluster(master, opts):
+def setup_spark_cluster(master, opts, format_ebs):
     ssh(master, opts, "chmod u+x spark-ec2-setup/setup.sh")
-    ssh(master, opts, "spark-ec2-setup/setup.sh")
+    ssh(master, opts, "spark-ec2-setup/setup.sh " + format_ebs)
     print("Spark cluster started at http://%s:7077" % master)
 
 def is_ssh_available(host, opts, print_ssh_output=True):
@@ -1223,7 +1223,7 @@ def real_main():
 	    cluster_instances=(master_nodes + slave_nodes),
 	    cluster_state='ssh-ready'
 	)
-	setup_cluster(conn, master_nodes, slave_nodes, opts, True)
+	setup_cluster(conn, master_nodes, slave_nodes, opts, True, "true")
 
     elif action == "start":
 	(master_nodes, slave_nodes) = get_existing_cluster(conn, opts, cluster_name)
@@ -1252,7 +1252,7 @@ def real_main():
 	opts.master_instance_type = existing_master_type
 	opts.instance_type = existing_slave_type
 
-	setup_cluster(conn, master_nodes, slave_nodes, opts, False)
+	setup_cluster(conn, master_nodes, slave_nodes, opts, False, "false")
 
     elif action == "destroy":
 	(master_nodes, slave_nodes) = get_existing_cluster(

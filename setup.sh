@@ -71,7 +71,7 @@ parallel-ssh --inline \
     --user root \
     --extra-args "-t -t $SSH_OPTS" \
     --timeout 0 \
-    "spark-ec2-setup/setup-slave.sh"
+    "spark-ec2-setup/setup-slave.sh $1"
 setup_slave_end_time="$(date +'%s')"
 echo_time_diff "setup-slave" "$setup_slave_start_time" "$setup_slave_end_time"
 
