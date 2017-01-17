@@ -715,8 +715,8 @@ def permit_root_ssh_login(host, opts):
 # or started EC2 cluster.
 def setup_cluster(conn, master_nodes, slave_nodes, opts, deploy_ssh_key):
     master = get_dns_name(master_nodes[0], opts.private_ips)
-    permit_root_ssh_login(master, opts)
     if deploy_ssh_key:
+        permit_root_ssh_login(master, opts)
 	print("Generating cluster's SSH key on master...")
 	key_setup = """
 	  [ -f ~/.ssh/id_rsa ] ||
