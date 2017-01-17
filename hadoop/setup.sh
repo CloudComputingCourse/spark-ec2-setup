@@ -16,6 +16,11 @@ else
   $PERSISTENT_HDFS/bin/hdfs namenode -format
 fi
 
+SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=5"
+
+# dummy command just to silent SSH authentication
+ssh $SSH_OPTS 0.0.0.0 "echo 'dummy'"
+
 $PERSISTENT_HDFS/sbin/start-dfs.sh
 
 popd > /dev/null

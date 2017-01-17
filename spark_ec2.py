@@ -741,7 +741,7 @@ def setup_cluster(conn, master_nodes, slave_nodes, opts, deploy_ssh_key):
     ssh(
 	host=master,
 	opts=opts,
-	command="rm -rf spark-ec2"
+	command="rm -rf spark-ec2-setup"
 	+ " && "
 	+ "git clone {r} -b {b} spark-ec2-setup".format(r=opts.spark_ec2_git_repo,
 						  b=opts.spark_ec2_git_branch)
