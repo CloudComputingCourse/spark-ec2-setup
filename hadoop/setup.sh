@@ -12,10 +12,10 @@ PERSISTENT_HDFS=/root/hadoop
 if [ -f "$NAMENODE_DIR/current/VERSION" ]; then
   echo "Hadoop namenode appears to be formatted: skipping"
 else
-  echo "Formatting ephemeral HDFS namenode..."
+  echo "Formatting HDFS namenode..."
   $PERSISTENT_HDFS/bin/hdfs namenode -format
 fi
 
-$PERSISTENT_HDFS/bin/start-dfs.sh
+$PERSISTENT_HDFS/sbin/start-dfs.sh
 
 popd > /dev/null

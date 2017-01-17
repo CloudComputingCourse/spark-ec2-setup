@@ -93,7 +93,7 @@ for module in $MODULES; do
   sleep 0.1
   module_setup_end_time="$(date +'%s')"
   echo_time_diff "$module setup" "$module_setup_start_time" "$module_setup_end_time"
-  cd /root/spark-ec2  # guard against setup.sh changing the cwd
+  cd /root/spark-ec2-setup  # guard against setup.sh changing the cwd
 done
 
 popd > /dev/null
