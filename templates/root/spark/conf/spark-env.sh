@@ -21,6 +21,7 @@
 # Copy it as spark-env.sh and edit that to configure Spark for your site.
 
 export HADOOP_CONF_DIR="/root/hadoop/etc/hadoop"
+export JAVA_HOME={{java_home}}
 
 export SPARK_PUBLIC_DNS=`
 wget -q -O - http://169.254.169.254/latest/meta-data/public-hostname ||\
