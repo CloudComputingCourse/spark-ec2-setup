@@ -20,7 +20,7 @@
 # This file is sourced when running various Spark programs.
 # Copy it as spark-env.sh and edit that to configure Spark for your site.
 
-export HADOOP_CONF_DIR="/root/hadoop-2.7.3/etc/hadoop"
+export HADOOP_CONF_DIR="/root/hadoop/etc/hadoop"
 
 export SPARK_PUBLIC_DNS=`
 wget -q -O - http://169.254.169.254/latest/meta-data/public-hostname ||\
