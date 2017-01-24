@@ -534,30 +534,6 @@ def launch_cluster(conn, opts, cluster_name):
 	    my_req_ids += [req.id for req in slave_reqs]
 	    i += 1
 
-	print("Requesting 1 master as spot instances with price $%.3f" %
-	      (opts.spot_price,))
-	zone = random.choice(conn.get_all_zones()).name
-	master_type = opts.master_instance_type
-	if master_type == "":
-	    master_type = opts.instance_type
-	master_req = conn.request_spot_instances(
-	    price=opts.spot_price,
-	    image_id=opts.ami,
-	    launch_group="launch-group-%s" % cluster_name,
-	    placement=zone,
-	    count=1,
-	    key_name=opts.key_pair,
-	    security_group_ids=[master_group.id] + additional_group_ids,
-	    instance_type=master_type,
-	    block_device_map=block_map,
-	    subnet_id=opts.subnet_id,
-	    placement_group=opts.placement_group,
-	    user_data=user_data_content,
-	    instance_profile_name=opts.instance_profile_name)
-        my_req_ids += [req.id for req in master_req]
-        i += 1
-
-
 	print("Waiting for spot instances to be granted...")
 	try:
 	    while True:
@@ -570,18 +546,16 @@ def launch_cluster(conn, opts, cluster_name):
 		for i in my_req_ids:
 		    if i in id_to_req and id_to_req[i].state == "active":
 			active_instance_ids.append(id_to_req[i].instance_id)
-		if len(active_instance_ids) == opts.slaves + 1:
-		    print("All %d spot instances granted" % (opts.slaves + 1))
+		if len(active_instance_ids) == opts.slaves:
+		    print("All %d slaves granted" % opts.slaves)
 		    reservations = conn.get_all_reservations(active_instance_ids)
 		    slave_nodes = []
 		    for r in reservations:
 			slave_nodes += r.instances
-                    master_nodes = []
-                    master_nodes.append(slave_nodes.pop())
 		    break
 		else:
-		    print("%d of %d spot instances granted, waiting longer" % (
-			len(active_instance_ids), opts.slaves + 1))
+		    print("%d of %d slaves granted, waiting longer" % (
+			len(active_instance_ids), opts.slaves))
 	except:
 	    print("Canceling spot instance requests")
 	    conn.cancel_spot_instance_requests(my_req_ids)
@@ -593,9 +567,37 @@ def launch_cluster(conn, opts, cluster_name):
 		print(("WARNING: %d instances are still running" % running), file=stderr)
 	    sys.exit(0)
     else:
-	print ("ERROR: --spot-price was not set; should always launch slaves as spot instances, exit")
-        sys.exit(0)
+        print ("ERROR: --spot-price not set, should always launch slaves as spot instances, exit")
 
+    # Launch or resume masters
+    if existing_masters:
+	print("Starting master...")
+	for inst in existing_masters:
+	    if inst.state not in ["shutting-down", "terminated"]:
+		inst.start()
+	master_nodes = existing_masters
+    else:
+	master_type = opts.master_instance_type
+	if master_type == "":
+	    master_type = opts.instance_type
+	if opts.zone == 'all':
+	    opts.zone = random.choice(conn.get_all_zones()).name
+	master_res = image.run(
+	    key_name=opts.key_pair,
+	    security_group_ids=[master_group.id] + additional_group_ids,
+	    instance_type=master_type,
+	    placement=opts.zone,
+	    min_count=1,
+	    max_count=1,
+	    block_device_map=block_map,
+	    subnet_id=opts.subnet_id,
+	    placement_group=opts.placement_group,
+	    user_data=user_data_content,
+	    instance_initiated_shutdown_behavior=opts.instance_initiated_shutdown_behavior,
+	    instance_profile_name=opts.instance_profile_name)
+
+	master_nodes = master_res.instances
+	print("Launched master in %s, regid = %s" % (zone, master_res.id))
 
     # This wait time corresponds to SPARK-4983
     print("Waiting for AWS to propagate instance metadata...")
