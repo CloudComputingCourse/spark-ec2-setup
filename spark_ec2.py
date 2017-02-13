@@ -554,8 +554,7 @@ def launch_cluster(conn, opts, cluster_name):
 	    placement_group=opts.placement_group,
 	    user_data=user_data_content,
 	    instance_profile_name=opts.instance_profile_name)
-        my_req_ids += [req.id for req in master_req]
-        i += 1
+	master_req_id = master_req[0].id
 
 
 	print("Waiting for spot instances to be granted...")
@@ -570,18 +569,23 @@ def launch_cluster(conn, opts, cluster_name):
 		for i in my_req_ids:
 		    if i in id_to_req and id_to_req[i].state == "active":
 			active_instance_ids.append(id_to_req[i].instance_id)
-		if len(active_instance_ids) == opts.slaves + 1:
+		master_active = False
+		if master_req_id in id_to_req and id_to_req[master_req_id].state == "active":
+		    master_active = True
+		if len(active_instance_ids) == opts.slaves and master_active:
 		    print("All %d spot instances granted" % (opts.slaves + 1))
 		    reservations = conn.get_all_reservations(active_instance_ids)
 		    slave_nodes = []
 		    for r in reservations:
 			slave_nodes += r.instances
-                    master_nodes = []
-                    master_nodes.append(slave_nodes.pop())
+		    master_nodes = []
+		    master_reservations = conn.get_all_reservations([id_to_req[master_req_id].instance_id])
+		    master_nodes += master_reservations[0].instances
 		    break
 		else:
-		    print("%d of %d spot instances granted, waiting longer" % (
-			len(active_instance_ids), opts.slaves + 1))
+		    print("%d of %d slave spot instances granted, waiting longer" % (
+			len(active_instance_ids) + 1 if master_active else len(active_instance_ids),
+			opts.slaves + 1))
 	except:
 	    print("Canceling spot instance requests")
 	    conn.cancel_spot_instance_requests(my_req_ids)
@@ -594,7 +598,7 @@ def launch_cluster(conn, opts, cluster_name):
 	    sys.exit(0)
     else:
 	print ("ERROR: --spot-price was not set; should always launch slaves as spot instances, exit")
-        sys.exit(0)
+	sys.exit(0)
 
 
     # This wait time corresponds to SPARK-4983
