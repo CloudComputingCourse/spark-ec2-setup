@@ -1,5 +1,5 @@
 `spark-ec2-setup` allows you to launch, manage and shut down Apache Spark clusters on Amazon EC2.
-Currently it only supports Spark v2.1.0 along with HDFS v2.7.3 and must use AMI ami-761ff660 (or images
+Currently it only supports Spark v2.1.0 along with HDFS v2.7.3 and must use AMI ami-6d15ec7b (or images
 created based on it). This tool is baased on `spark-ec2` (https://github.com/amplab/spark-ec2) from AMP Lab.
 
 ## Before You Start
