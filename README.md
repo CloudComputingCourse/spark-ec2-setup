@@ -1,6 +1,7 @@
 `spark-ec2-setup` allows you to launch, manage and shut down Apache Spark clusters on Amazon EC2.
 Currently it only supports Spark v2.1.0 along with HDFS v2.7.3 and must use AMI ami-6d15ec7b (or images
-created based on it). This tool is baased on `spark-ec2` (https://github.com/amplab/spark-ec2) from AMP Lab.
+created based on it). This tool is based on `spark-ec2` (https://github.com/amplab/spark-ec2) from AMP Lab.
+Please make sure you use Python 2.7 with this tool.
 
 ## Before You Start
 
@@ -33,6 +34,9 @@ created based on it). This tool is baased on `spark-ec2` (https://github.com/amp
  -  EBS volume:
     The script requires you to add at least one EBS volume besides the root volume. The first EBS volume added
     will be mounted and used for HDFS. You can add more than one volumes, but they will not be mounted by `spark-ec2`.
+ -  Python version: Please make sure the default "python" command points to Python 2.7. You can check this with
+    `python --version`. Alternatively, you can change the shell script file `spark-ec2` and point the python command to
+	Python 2.7.
     
 ## Other Actions
 
