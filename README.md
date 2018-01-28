@@ -1,7 +1,6 @@
 `spark-ec2-setup` allows you to launch, manage and shut down Apache Spark clusters on Amazon EC2.
 Currently it only supports Spark v2.1.0 along with HDFS v2.7.3 and must use AMI ami-6d15ec7b (or images
 created based on it). This tool is based on `spark-ec2` (https://github.com/amplab/spark-ec2) from AMP Lab.
-Please make sure you use Python 2.7 with this tool.
 
 ## Before You Start
 
@@ -23,20 +22,17 @@ Please make sure you use Python 2.7 with this tool.
 -   Example:
     `./spark-ec2 -k <keypair> -i <key-file> -s <num-slaves> -t <instance-type> -a <AMI-ID>
     -v <spark-version> --ebs-vol-size=<size-in-GB> --ebs-vol-type=<ebs-vol-type> 
-    --ebs-vol-num=<1-to-8> --spot-price=<spot-price> launch <cluster-name>`,
+    --ebs-vol-num=<1-to-8> --spot-price=<spot-price> --additional-tags=<tags> launch <cluster-name>`,
     where `<keypair>` is the name of your EC2 key pair (that you gave it
     when you created it), `<key-file>` is the private key file for your
     key pair, `<num-slaves>` is the number of slave nodes to launch (try
     1 at first), `<instance-type>` is the instance type (e.g. m4.xlarge)
-    and `<cluster-name>` is the name to give to your
-    cluster. If `--spot-price` is set, the cluster is launched as spot instances 
+    ,`<cluster-name>` is the name to give to your
+    cluster, and `<tags>` is the tags you want to add to the instances (e.g., "Project:MyProject,Type:Project". If `--spot-price` is set, the cluster is launched as spot instances 
     with the given maximum price.
  -  EBS volume:
     The script requires you to add at least one EBS volume besides the root volume. The first EBS volume added
     will be mounted and used for HDFS. You can add more than one volumes, but they will not be mounted by `spark-ec2`.
- -  Python version: Please make sure the default "python" command points to Python 2.7. You can check this with
-    `python --version`. Alternatively, you can change the shell script file `spark-ec2` and point the `python` command to
-	Python 2.7.
     
 ## Other Actions
 
