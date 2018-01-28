@@ -35,7 +35,7 @@ Please make sure you use Python 2.7 with this tool.
     The script requires you to add at least one EBS volume besides the root volume. The first EBS volume added
     will be mounted and used for HDFS. You can add more than one volumes, but they will not be mounted by `spark-ec2`.
  -  Python version: Please make sure the default "python" command points to Python 2.7. You can check this with
-    `python --version`. Alternatively, you can change the shell script file `spark-ec2` and point the python command to
+    `python --version`. Alternatively, you can change the shell script file `spark-ec2` and point the `python` command to
 	Python 2.7.
     
 ## Other Actions
