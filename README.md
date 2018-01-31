@@ -18,7 +18,7 @@ created based on it). This tool is based on `spark-ec2` (https://github.com/ampl
 
 ## Launching a Cluster
 
--   Go into the `ec2` directory in the release of Apache Spark you downloaded.
+-   Go into the `spark-ec2-setup` directory you clone from this repo
 -   Example:
     `./spark-ec2 -k <keypair> -i <key-file> -s <num-slaves> -t <instance-type> -a <AMI-ID>
     -v <spark-version> --ebs-vol-size=<size-in-GB> --ebs-vol-type=<ebs-vol-type> 
