@@ -20,10 +20,10 @@ master_ram_kb = int(
 first_slave = os.popen("cat /root/spark-ec2-setup/slaves | head -1").read().strip()
 
 slave_mem_command = "ssh -t -o StrictHostKeyChecking=no %s %s" %\
-	(first_slave, mem_command)
+        (first_slave, mem_command)
 
 slave_cpu_command = "ssh -t -o StrictHostKeyChecking=no %s %s" %\
-	(first_slave, cpu_command)
+        (first_slave, cpu_command)
 
 slave_ram_kb = int(os.popen(slave_mem_command).read().strip())
 
@@ -78,12 +78,12 @@ for path, dirs, files in os.walk(template_dir):
       os.makedirs(dest_dir)
     for filename in files:
       if filename[0] not in '#.~' and filename[-1] != '~':
-	dest_file = os.path.join(dest_dir, filename)
-	with open(os.path.join(path, filename)) as src:
-	  with open(dest_file, "w") as dest:
-	    print("Configuring " + dest_file)
-	    text = src.read()
-	    for key in template_vars:
-	      text = text.replace("{{" + key + "}}", template_vars[key] or '')
-	    dest.write(text)
-	    dest.close()
+        dest_file = os.path.join(dest_dir, filename)
+        with open(os.path.join(path, filename)) as src:
+          with open(dest_file, "w") as dest:
+            print("Configuring " + dest_file)
+            text = src.read()
+            for key in template_vars:
+              text = text.replace("{{" + key + "}}", template_vars[key] or '')
+            dest.write(text)
+            dest.close()
