@@ -151,12 +151,12 @@ def parse_args():
         help="If you have multiple profiles (AWS or boto config), you can configure " +
              "additional, named profiles by using this option (default: %default)")
     parser.add_option(
-        "-t", "--instance-type", default="m3.large",
+        "-t", "--instance-type", default="m4.xlarge",
         help="Type of instance to launch (default: %default). " +
              "WARNING: must be 64-bit; small instances won't work")
-    parser.add_option(
-        "-m", "--master-instance-type", default="",
-        help="Master instance type (leave empty for same as instance-type)")
+    # parser.add_option(
+    #     "-m", "--master-instance-type", default="",
+    #     help="Master instance type (leave empty for same as instance-type)")
     parser.add_option(
         "-r", "--region", default="us-east-1",
         help="EC2 region used to launch instances in, or to find them in (default: %default)")
@@ -537,7 +537,8 @@ def launch_cluster(conn, opts, cluster_name):
         print("Requesting 1 master as spot instances with price $%.3f" %
               (opts.spot_price,))
         zone = random.choice(conn.get_all_zones()).name
-        master_type = opts.master_instance_type
+        # force both master and slave to use same instance type
+        master_type = opts.instance_type
         if master_type == "":
             master_type = opts.instance_type
         master_req = conn.request_spot_instances(
