@@ -151,12 +151,9 @@ def parse_args():
         help="If you have multiple profiles (AWS or boto config), you can configure " +
              "additional, named profiles by using this option (default: %default)")
     parser.add_option(
-        "-t", "--instance-type", default="m3.large",
+        "-t", "--instance-type", default="m4.xlarge",
         help="Type of instance to launch (default: %default). " +
              "WARNING: must be 64-bit; small instances won't work")
-    parser.add_option(
-        "-m", "--master-instance-type", default="",
-        help="Master instance type (leave empty for same as instance-type)")
     parser.add_option(
         "-r", "--region", default="us-east-1",
         help="EC2 region used to launch instances in, or to find them in (default: %default)")
@@ -537,9 +534,6 @@ def launch_cluster(conn, opts, cluster_name):
         print("Requesting 1 master as spot instances with price $%.3f" %
               (opts.spot_price,))
         zone = random.choice(conn.get_all_zones()).name
-        master_type = opts.master_instance_type
-        if master_type == "":
-            master_type = opts.instance_type
         master_req = conn.request_spot_instances(
             price=opts.spot_price,
             image_id=opts.ami,
@@ -548,7 +542,7 @@ def launch_cluster(conn, opts, cluster_name):
             count=1,
             key_name=opts.key_pair,
             security_group_ids=[master_group.id] + additional_group_ids,
-            instance_type=master_type,
+            instance_type=opts.instance_type,
             block_device_map=block_map,
             subnet_id=opts.subnet_id,
             placement_group=opts.placement_group,
@@ -1144,24 +1138,6 @@ def real_main():
         print("Warning: Unrecognized EC2 instance type for instance-type: {t}".format(
               t=opts.instance_type), file=stderr)
 
-    if opts.master_instance_type != "":
-        if opts.master_instance_type not in EC2_INSTANCE_TYPES:
-            print("Warning: Unrecognized EC2 instance type for master-instance-type: {t}".format(
-                  t=opts.master_instance_type), file=stderr)
-        # Since we try instance types even if we can't resolve them, we check if they resolve first
-        # and, if they do, see if they resolve to the same virtualization type.
-        if opts.instance_type in EC2_INSTANCE_TYPES and \
-           opts.master_instance_type in EC2_INSTANCE_TYPES:
-            if EC2_INSTANCE_TYPES[opts.instance_type] != \
-               EC2_INSTANCE_TYPES[opts.master_instance_type]:
-                print("Error: spark-ec2 currently does not support having a master and slaves "
-                      "with different AMI virtualization types.", file=stderr)
-                print("master instance virtualization type: {t}".format(
-                      t=EC2_INSTANCE_TYPES[opts.master_instance_type]), file=stderr)
-                print("slave instance virtualization type: {t}".format(
-                      t=EC2_INSTANCE_TYPES[opts.instance_type]), file=stderr)
-                sys.exit(1)
-
     if opts.ebs_vol_num > 8:
         print("ebs-vol-num cannot be greater than 8", file=stderr)
         sys.exit(1)
@@ -1222,9 +1198,8 @@ def real_main():
         existing_slave_type = slave_nodes[0].instance_type
         # Setting opts.master_instance_type to the empty string indicates we
         # have the same instance type for the master and the slaves
-        if existing_master_type == existing_slave_type:
-            existing_master_type = ""
-        opts.master_instance_type = existing_master_type
+        if existing_master_type != existing_slave_type:
+            sys.exit(1)
         opts.instance_type = existing_slave_type
 
         setup_cluster(conn, master_nodes, slave_nodes, opts, False, "false")
