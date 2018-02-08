@@ -533,7 +533,7 @@ def launch_cluster(conn, opts, cluster_name):
 
         print("Requesting 1 master as spot instances with price $%.3f" %
               (opts.spot_price,))
-        zone = random.choice(conn.get_all_zones()).name
+        zone = random.choice(zones)
         master_req = conn.request_spot_instances(
             price=opts.spot_price,
             image_id=opts.ami,
