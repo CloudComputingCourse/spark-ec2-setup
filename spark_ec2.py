@@ -43,6 +43,8 @@ from datetime import datetime
 from optparse import OptionParser
 from sys import stderr
 
+from itertools import chain
+
 if sys.version < "3":
     from urllib2 import urlopen, Request, HTTPError
 else:
@@ -373,6 +375,11 @@ EC2_INSTANCE_TYPES = {
     "t2.large":    "hvm",
 }
 
+def get_volumes(instance_arr):
+    nested_list = map(lambda x: x.block_device_mapping.values(), instance_arr)
+    vol_list = map(lambda x: x.volume_id, chain.from_iterable(nested_list))
+    return vol_list
+
 
 # Launch a cluster of the given name, by setting up its security groups,
 # and then starting new instances in them.
@@ -615,6 +622,12 @@ def launch_cluster(conn, opts, cluster_name):
         slave.add_tags(
             dict(additional_tags, Name='{cn}-slave-{iid}'.format(cn=cluster_name, iid=slave.id))
         )
+
+    volumes = []
+    volumes += get_volumes(master_nodes)
+    volumes += get_volumes(slave_nodes)
+
+    conn.create_tags(volumes, additional_tags)
 
     # Return all the instances
     return (master_nodes, slave_nodes)
