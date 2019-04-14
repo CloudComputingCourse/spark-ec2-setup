@@ -21,6 +21,9 @@ SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=5"
 # dummy command just to silent SSH authentication
 ssh $SSH_OPTS 0.0.0.0 "echo 'dummy'"
 
+# dummy command above will fail; hack to circumvent
+echo -e "Host * \n\t StrictHostKeyChecking no" > ~/.ssh/config
+
 $PERSISTENT_HDFS/sbin/start-dfs.sh
 
 popd > /dev/null
