@@ -755,6 +755,8 @@ def setup_cluster(conn, master_nodes, slave_nodes, opts, deploy_ssh_key, format_
 def setup_spark_cluster(master, opts, format_ebs):
     ssh(master, opts, "chmod u+x spark-ec2-setup/setup.sh")
     ssh(master, opts, "spark-ec2-setup/setup.sh " + format_ebs)
+    with open('~/spark_master', 'w+') as m:
+        m.write(master)
     print("Spark cluster started at http://%s:7077" % master)
 
 def is_ssh_available(host, opts, print_ssh_output=True):
