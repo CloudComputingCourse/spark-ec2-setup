@@ -5,31 +5,35 @@
 # This might mitigate that
 sleep 5
 
+# pssh install usually fails so exepct this to fail as well; not needed
+# left here for historic reasons
+sudo apt-get install -y -q pssh
+
 
 # Check if the previous command executed successfully
-apt_ret=0
-for attempt in `seq 1 5`
-do
-  echo "Trying to install pssh, attempt $attempt"
-  sudo apt-get install -y -q pssh
-  apt_ret=$?
+# apt_ret=0
+# for attempt in `seq 1 5`
+# do
+  # echo "Trying to install pssh, attempt $attempt"
+  # sudo apt-get install -y -q pssh
+  # apt_ret=$?
 
-  if [[ $apt_ret == 0 ]]
-  then
-    echo "pssh installed successfully."
-    break
-  fi
-done
+  # if [[ $apt_ret == 0 ]]
+  # then
+    # echo "pssh installed successfully."
+    # break
+  # fi
+# done
 
-if [[ $apt_ret != 0 ]]
-then
-  echo "********************************************"
-  echo "Unable to install pssh. Something broke within the Spark Cluster"
-  echo "Please destroy this cluster manually from AWS GUI"
-  echo "And try to respawn it."
-  echo "********************************************"
-  exit 255
-fi
+# if [[ $apt_ret != 0 ]]
+# then
+  # echo "********************************************"
+  # echo "Unable to install pssh. Something broke within the Spark Cluster"
+  # echo "Please destroy this cluster manually from AWS GUI"
+  # echo "And try to respawn it."
+  # echo "********************************************"
+  # exit 255
+# fi
 
 # usage: echo_time_diff name start_time end_time
 echo_time_diff () {
